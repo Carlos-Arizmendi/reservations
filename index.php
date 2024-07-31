@@ -28,10 +28,49 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    var calendarEl = document.getElementById('calendar');
-    var calendar = new FullCalendar.Calendar(calendarEl, {
+
+    const getAllData = () => {
+      const obj = {
+        action: 'showData'
+      }
+
+      fetch('includes/events.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(obj)
+        })
+        .then(response => response.json())
+        .then(json => {
+           let eventsArray = []
+          json.forEach((row, index) => {
+            const event = {
+                id: row.id,
+                start: row.start_date,
+                end: row.end_date,
+                title: row.title,
+                // backgroundColor: colors[index]
+            }
+            eventsArray.push(event)
+          })
+          sessionStorage.setItem('events', JSON.stringify(eventsArray))
+        })
+    }
+
+    getAllData()
+    const allEvents = JSON.parse(sessionStorage.getItem('events'))
+    console.log(allEvents) 
+    const calendarEl = document.querySelector('#calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
-        locale: 'es'
+        locale: 'es',
+        dateClick: function(info) {
+            alert('Seleccionaste el dia '+info.dateStr);
+            console.log(info)
+        },
+        events: allEvents
+
     });
     calendar.render();
 });
